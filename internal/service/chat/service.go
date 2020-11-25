@@ -1,6 +1,9 @@
 package chat
 
-import "github.com/maxisantomil/GoLang2020.git/internal/config"
+import (
+	"github.com/jmoiron/sqlx"
+	"github.com/maxisantomil/GoLang2020.git/internal/config"
+)
 
 // Message ...
 type Message struct {
@@ -8,8 +11,8 @@ type Message struct {
 	Text string
 }
 
-// ChatService ...
-type ChatService interface { /*interface*/
+// Service ...
+type Service interface {
 	AddMessage(Message) error
 	FindByID(int) *Message
 	FindAll() []*Message
@@ -17,12 +20,13 @@ type ChatService interface { /*interface*/
 
 // devuelve algo que es privado
 type service struct {
+	db   *sqlx.DB
 	conf *config.Config
 }
 
 // New ...
-func New(c *config.Config) (ChatService, error) {
-	return service{c}, nil
+func New(db *sqlx.DB, c *config.Config) (Service, error) {
+	return service{db, c}, nil
 }
 
 func (s service) AddMessage(m Message) error {
@@ -35,6 +39,8 @@ func (s service) FindByID(int) *Message {
 
 func (s service) FindAll() []*Message {
 	var list []*Message
-	list = append(list, &Message{0, "Hello world"}, &Message{1, "Hello maxi"})
+	if err := s.db.Select(&list, "SELECT * FROM messages"); err != nil {
+		panic(err)
+	}
 	return list
 }
