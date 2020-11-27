@@ -34,16 +34,19 @@ func New(db *sqlx.DB, c *config.Config) (Service, error) {
 	return service{db, c}, nil
 }
 
+// agregar ...
 func (s service) AddVino(v Vino) (int64, error) {
 	query := `INSERT INTO Vino (Name, tipo, año, precio) VALUES (?,?,?,?)`
 	return s.db.MustExec(query, v.Name, v.tipo, v.año, v.precio).LastInsertId()
 }
 
+// modificar ...
 func (s service) UpdateVino(v Vino, id int64) {
 	query := `UPDATE Vino SET Name = ?, tipo = ?, año = ?, precio = ? WHERE id = ?`
 	s.db.MustExec(query, v.Name, v.tipo, v.año, v.precio, id)
 }
 
+// busca por id ...
 func (s service) FindByID(ID int64) *Vino {
 	vino := &Vino{}
 	query := `SELECT * FROM Vino WHERE id = ?`
@@ -62,6 +65,7 @@ func (s service) FindAll() []*Vino {
 	return list
 }
 
+// eliminar ...
 func (s service) DeleteVino(id int64) *Vino {
 	vino := s.FindByID(id)
 	query := `DELETE FROM vino WHERE id = ?`

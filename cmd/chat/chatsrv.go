@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -24,9 +23,9 @@ func main() {
 	}
 
 	service, _ := chat.New(db, cfg) // inyecto al chatService una configuracion
-	httpService := chat.NewHTTPTransport(service)
+	HTTPService := chat.NewHTTPTransport(service)
 	r := gin.Default()
-	httpService.Register(r)
+	HTTPService.Register(r)
 	r.Run()
 
 	/*for _, m := range service.FindAll() {
@@ -47,19 +46,17 @@ func readConfig() *config.Config {
 }
 
 func createSchema(db *sqlx.DB) error {
-	schema := `CREATE TABLE IF NOT EXISTS messages (
+	schema := `CREATE TABLE IF NOT EXISTS vino (
 		id integer primary key autoincrement,
-		text varchar);`
+		Name varchar,
+		tipo varchar,
+		año int,
+		precio);`
 
 	// execute a query on the server
 	_, err := db.Exec(schema)
 	if err != nil {
 		return err
 	}
-
-	// or, you can use MustExec, which panics on error
-	insertMessage := `INSERT INTO messages (text) VALUES (?)`
-	s := fmt.Sprintf("Message number %v", time.Now().Nanosecond())
-	db.MustExec(insertMessage, s)
 	return nil
 }
