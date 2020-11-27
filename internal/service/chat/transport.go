@@ -32,7 +32,7 @@ func makeEndpoints(s Service) []*endpoint {
 
 	list = append(list, &endpoint{
 		method:   "GET",
-		path:     "/ messages",
+		path:     "/ vinos",
 		function: getAll(s),
 	})
 	return list
@@ -41,7 +41,7 @@ func makeEndpoints(s Service) []*endpoint {
 func getAll(s Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"messages": s.FindAll(),
+			"vinos": s.FindAll(),
 		})
 	}
 }

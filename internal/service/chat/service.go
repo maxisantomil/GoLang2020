@@ -5,17 +5,22 @@ import (
 	"github.com/maxisantomil/GoLang2020.git/internal/config"
 )
 
-// Message ...
-type Message struct {
-	ID   int64
-	Text string
+// Vino ...
+type Vino struct {
+	ID     int64
+	Name   string
+	tipo   string
+	año    int
+	precio int
 }
 
 // Service ...
 type Service interface {
-	AddMessage(Message) error
-	FindByID(int) *Message
-	FindAll() []*Message
+	AddVino(Vino) (int64, error)
+	FindByID(int64) *Vino
+	FindAll() []*Vino
+	UpdateVino(Vino, int64)
+	DeleteVino(int64) *Vino
 }
 
 // devuelve algo que es privado
@@ -29,18 +34,37 @@ func New(db *sqlx.DB, c *config.Config) (Service, error) {
 	return service{db, c}, nil
 }
 
-func (s service) AddMessage(m Message) error {
-	return nil
+func (s service) AddVino(v Vino) (int64, error) {
+	query := `INSERT INTO Vino (Name, tipo, año, precio) VALUES (?,?,?,?)`
+	return s.db.MustExec(query, v.Name, v.tipo, v.año, v.precio).LastInsertId()
 }
 
-func (s service) FindByID(int) *Message {
-	return nil
+func (s service) UpdateVino(v Vino, id int64) {
+	query := `UPDATE Vino SET Name = ?, tipo = ?, año = ?, precio = ? WHERE id = ?`
+	s.db.MustExec(query, v.Name, v.tipo, v.año, v.precio, id)
 }
 
-func (s service) FindAll() []*Message {
-	var list []*Message
-	if err := s.db.Select(&list, "SELECT * FROM messages"); err != nil {
+func (s service) FindByID(ID int64) *Vino {
+	vino := &Vino{}
+	query := `SELECT * FROM Vino WHERE id = ?`
+	err := s.db.Get(vino, query, ID)
+	if err != nil {
+		return nil
+	}
+	return vino
+}
+
+func (s service) FindAll() []*Vino {
+	var list []*Vino
+	if err := s.db.Select(&list, "SELECT * FROM vino"); err != nil {
 		panic(err)
 	}
 	return list
+}
+
+func (s service) DeleteVino(id int64) *Vino {
+	vino := s.FindByID(id)
+	query := `DELETE FROM vino WHERE id = ?`
+	s.db.MustExec(query, id).RowsAffected()
+	return vino
 }
